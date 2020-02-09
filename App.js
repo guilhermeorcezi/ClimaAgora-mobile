@@ -12,7 +12,7 @@ export default function App() {
 				style={styles.container}
 			>
 				<View style={styles.content}>
-					<Text>OI PORRA DO CARL</Text>
+					<Text>Teste</Text>
 				</View>
 			</LinearGradient>
 		</SafeAreaView>
