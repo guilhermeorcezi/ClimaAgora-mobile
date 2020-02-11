@@ -6,25 +6,23 @@ import {
 	StyleSheet,
 	TextInput,
 	TouchableOpacity,
-	ImageBackground
+	ImageBackground,
+	Keyboard
 } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import {
-	requestPermissionsAsync,
-	getCurrentPositionAsync
-} from 'expo-location';
+import { Icon } from 'react-native-elements';
 import GeoCoder from 'react-native-geocoding';
 import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
+import { Alert } from 'react-native';
 
 export default function App() {
 	const [city, setCity] = useState('');
-	const [currentCity, setCurrentCity] = useState(null);
 
 	/*
 	useEffect(() => {
+		require('dotenv').config();
 		function getData() {
-			GeoCoder.init('AIzaSyD_S55kWjsN8sMqylq9pbG9p8046a8LtF4');
+			GeoCoder.init(`${process.env.API_KEY}`);
 			GeoCoder.from(28.6139, 77.209).then(
 				(json) => {
 					var adress_component = json.results[0];
@@ -51,16 +49,21 @@ export default function App() {
 	}, []); */
 
 	async function handleSubmit() {
-		const response = await axios.get(
-			`http://api.openweathermap.org/data/2.5/weather?q=${city},br&appid=531a125eabbef01c0a15891c5e5f73b9&units=metric`
-		);
+		try {
+			const response = await axios.get(
+				`http://api.openweathermap.org/data/2.5/weather?q=${city},br&appid=531a125eabbef01c0a15891c5e5f73b9&units=metric`
+			);
 
-		const {
-			name,
-			main: { temp, feels_like, humidity }
-		} = response.data;
+			const {
+				name,
+				main: { temp, feels_like, humidity }
+			} = response.data;
 
-		await setCity({ name, temp, feels_like, humidity });
+			Keyboard.dismiss();
+			await setCity({ name, temp, feels_like, humidity, activated: true });
+		} catch (err) {
+			Alert.alert('Cidade não existe');
+		}
 	}
 
 	return (
@@ -75,7 +78,8 @@ export default function App() {
 						style={styles.input}
 						placeholder="Digite uma cidade"
 						placeholderTextColor="#999"
-						keyboardType="email-address"
+						keyboardType="default"
+						autoCorrect
 						data={city}
 						onChangeText={setCity}
 					></TextInput>
@@ -83,23 +87,57 @@ export default function App() {
 						<Text style={styles.buttonText}>VERIFICAR</Text>
 					</TouchableOpacity>
 				</View>
-				{city ? (
+				{city.activated ? (
 					<View style={styles.content}>
 						<View style={styles.dataContent}>
-							<Text style={styles.dataTitle}>LOCALIZAÇÃO</Text>
+							<View style={styles.dataIcon}>
+								<Text style={styles.dataTitle}>LOCALIZAÇÃO</Text>
+								<Icon
+									name="map-marker"
+									color="#114b70"
+									size={18}
+									type="font-awesome"
+								/>
+							</View>
 							<Text style={styles.data}>{city.name}</Text>
 						</View>
 
 						<View style={styles.dataContent}>
-							<Text style={styles.dataTitle}>TEMPERATURA</Text>
-							<Text style={styles.data}>{city.temp}°</Text>
+							<View style={styles.dataIcon}>
+								<Text style={styles.dataTitle}>TEMPERATURA</Text>
+								<Icon
+									name={
+										city.temp > 28 ? 'thermometer-full' : 'thermometer-half'
+									}
+									type="font-awesome"
+									color="#114b70"
+									size={18}
+								/>
+							</View>
+							<Text style={styles.data}>{city.temp}°C</Text>
 						</View>
 						<View style={styles.dataContent}>
-							<Text style={styles.dataTitle}>SENSAÇÃO TÉRMICA</Text>
-							<Text style={styles.data}>{city.feels_like}°</Text>
+							<View style={styles.dataIcon}>
+								<Text style={styles.dataTitle}>SENSAÇÃO TÉRMICA</Text>
+								<Icon
+									name={city.temp > 28 ? 'sun-o' : 'cloud'}
+									type="font-awesome"
+									color="#114b70"
+									size={18}
+								/>
+							</View>
+							<Text style={styles.data}>{city.feels_like}°C</Text>
 						</View>
 						<View style={styles.dataContent}>
-							<Text style={styles.dataTitle}>UMIDADE</Text>
+							<View style={styles.dataIcon}>
+								<Text style={styles.dataTitle}>UMIDADE</Text>
+								<Icon
+									name="tint"
+									type="font-awesome"
+									color="#114b70"
+									size={18}
+								/>
+							</View>
 							<Text style={styles.data}>{city.humidity}%</Text>
 						</View>
 					</View>
@@ -175,15 +213,20 @@ const styles = StyleSheet.create({
 	},
 
 	dataContent: {
-		marginBottom: 30
+		marginBottom: 30,
+		alignItems: 'center',
+		alignContent: 'center'
+	},
+
+	dataIcon: {
+		flexDirection: 'row'
 	},
 
 	dataTitle: {
 		fontSize: 14,
 		fontWeight: 'bold',
 		color: '#114b70',
-		letterSpacing: 6,
-		textAlign: 'center'
+		letterSpacing: 6
 	},
 
 	data: {
