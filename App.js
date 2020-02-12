@@ -7,17 +7,21 @@ import {
 	TextInput,
 	TouchableOpacity,
 	ImageBackground,
-	Keyboard
+	Keyboard,
+	Alert
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import GeoCoder from 'react-native-geocoding';
 import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
-import { Alert } from 'react-native';
 
 export default function App() {
 	const [city, setCity] = useState('');
+	const [inputCity, setInputCity] = useState('');
 
+	useEffect(() => {
+		setInputCity('');
+	}, [setCity]);
 	/*
 	useEffect(() => {
 		require('dotenv').config();
@@ -51,7 +55,7 @@ export default function App() {
 	async function handleSubmit() {
 		try {
 			const response = await axios.get(
-				`http://api.openweathermap.org/data/2.5/weather?q=${city},br&appid=531a125eabbef01c0a15891c5e5f73b9&units=metric`
+				`http://api.openweathermap.org/data/2.5/weather?q=${inputCity},br&appid=531a125eabbef01c0a15891c5e5f73b9&units=metric`
 			);
 
 			const {
@@ -62,7 +66,9 @@ export default function App() {
 			Keyboard.dismiss();
 			await setCity({ name, temp, feels_like, humidity, activated: true });
 		} catch (err) {
-			Alert.alert('Cidade não existe');
+			Alert.alert('Oops...', 'Cidade não encontrada!', [
+				{ text: 'Tentar Novamente' }
+			]);
 		}
 	}
 
@@ -80,8 +86,9 @@ export default function App() {
 						placeholderTextColor="#999"
 						keyboardType="default"
 						autoCorrect
-						data={city}
-						onChangeText={setCity}
+						z={inputCity}
+						onChangeText={setInputCity}
+						onSubmitEditing={handleSubmit}
 					></TextInput>
 					<TouchableOpacity onPress={handleSubmit} style={styles.button}>
 						<Text style={styles.buttonText}>VERIFICAR</Text>
@@ -90,55 +97,59 @@ export default function App() {
 				{city.activated ? (
 					<View style={styles.content}>
 						<View style={styles.dataContent}>
+							<Text style={styles.dataTitle}>LOCALIZAÇÃO</Text>
 							<View style={styles.dataIcon}>
-								<Text style={styles.dataTitle}>LOCALIZAÇÃO</Text>
+								<Text style={styles.data}>{city.name} </Text>
 								<Icon
 									name="map-marker"
 									color="#114b70"
-									size={18}
+									size={20}
 									type="font-awesome"
+									style={styles.icon}
 								/>
 							</View>
-							<Text style={styles.data}>{city.name}</Text>
 						</View>
 
 						<View style={styles.dataContent}>
+							<Text style={styles.dataTitle}>TEMPERATURA</Text>
 							<View style={styles.dataIcon}>
-								<Text style={styles.dataTitle}>TEMPERATURA</Text>
+								<Text style={styles.data}>{city.temp}°C </Text>
 								<Icon
 									name={
 										city.temp > 28 ? 'thermometer-full' : 'thermometer-half'
 									}
 									type="font-awesome"
 									color="#114b70"
-									size={18}
+									size={20}
+									style={styles.icon}
 								/>
 							</View>
-							<Text style={styles.data}>{city.temp}°C</Text>
 						</View>
 						<View style={styles.dataContent}>
+							<Text style={styles.dataTitle}>SENSAÇÃO TÉRMICA</Text>
 							<View style={styles.dataIcon}>
-								<Text style={styles.dataTitle}>SENSAÇÃO TÉRMICA</Text>
+								<Text style={styles.data}>{city.feels_like}°C </Text>
 								<Icon
 									name={city.temp > 28 ? 'sun-o' : 'cloud'}
 									type="font-awesome"
 									color="#114b70"
-									size={18}
+									size={20}
+									style={{ marginTop: 50 }}
 								/>
 							</View>
-							<Text style={styles.data}>{city.feels_like}°C</Text>
 						</View>
 						<View style={styles.dataContent}>
+							<Text style={styles.dataTitle}>UMIDADE</Text>
+
 							<View style={styles.dataIcon}>
-								<Text style={styles.dataTitle}>UMIDADE</Text>
+								<Text style={styles.data}>{city.humidity}% </Text>
 								<Icon
 									name="tint"
 									type="font-awesome"
 									color="#114b70"
-									size={18}
+									size={20}
 								/>
 							</View>
-							<Text style={styles.data}>{city.humidity}%</Text>
 						</View>
 					</View>
 				) : (
@@ -178,15 +189,6 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFF'
 	},
 
-	content: {
-		marginHorizontal: 20,
-		borderRadius: 4,
-		padding: 10,
-		marginVertical: 20,
-		backgroundColor: '#FFF',
-		paddingTop: 40
-	},
-
 	input: {
 		borderWidth: 1,
 		borderColor: '#ddd',
@@ -194,22 +196,34 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#444',
 		height: 44,
-		marginBottom: 20,
-		borderRadius: 2
-	},
-	button: {
-		height: 42,
-		backgroundColor: 'rgba(0,97,249,1)',
-		justifyContent: 'center',
-		alignItems: 'center',
 		borderRadius: 2,
 		marginBottom: 10
+	},
+
+	button: {
+		height: 42,
+		backgroundColor: '#114b70',
+		justifyContent: 'center',
+		alignItems: 'center',
+		alignSelf: 'center',
+		borderRadius: 50,
+		paddingHorizontal: 100,
+		marginBottom: 5
 	},
 
 	buttonText: {
 		color: '#fff',
 		fontWeight: 'bold',
 		fontSize: 16
+	},
+
+	content: {
+		marginHorizontal: 20,
+		borderRadius: 4,
+		padding: 10,
+		marginVertical: 20,
+		backgroundColor: '#FFF',
+		paddingTop: 40
 	},
 
 	dataContent: {
@@ -226,13 +240,15 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: 'bold',
 		color: '#114b70',
-		letterSpacing: 6
+		letterSpacing: 6,
+		marginBottom: 5
 	},
 
 	data: {
 		textAlign: 'center',
 		fontSize: 18,
-		color: '#666'
+		color: '#666',
+		marginRight: 5
 	},
 
 	empty: {
