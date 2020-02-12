@@ -4,7 +4,8 @@
 Clima Agora Mobile
 </h1>
 
-<p align="center"> 🚀 A mobile application to search the climate conditions of any Brazil's city. Maybe you'd like to check the <a href="https://github.com/guilhermeorcezi/ClimaAgora">Web Version</a> too.</p>
+<p align="center"> 🚀 A mobile application to search the climate conditions of any Brazil's city. </p>
+Maybe you'd like to check the <a href="https://github.com/guilhermeorcezi/ClimaAgora">Web Version</a> too.
 <p align="center">
   <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License MIT">
