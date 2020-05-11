@@ -20,7 +20,7 @@ Maybe you'd like to check the <a href="https://github.com/guilhermeorcezi/ClimaA
 
 To start App using React Native use the commands:
 ```bash
-# You do NOT need to run the bottom line if you already have Expo (CLI) installed
+# You do NOT need to run the first line below if you already have Expo (CLI) installed
 yarn global add install expo-cli
 yarn install
 yarn start
